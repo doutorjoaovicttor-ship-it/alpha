@@ -15,8 +15,9 @@ const api = async (url, options = {}) => {
     headers: { "Content-Type": "application/json" },
     ...options
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || "Erro na requisição");
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : {};
+  if (!response.ok) throw new Error(data.error || `Erro na requisição (${response.status})`);
   return data;
 };
 
