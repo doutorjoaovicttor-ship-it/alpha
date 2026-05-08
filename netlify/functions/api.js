@@ -67,8 +67,9 @@ function verify(token) {
 
 async function loadState() {
   if (getStore && process.env.NETLIFY) {
-    const store = getStore("alpha-sistema");
-    return (await store.get("state", { type: "json" })) || defaultState();
+    const store = getStore({ name: "alpha-sistema", consistency: "strong" });
+    const saved = await store.get("state", { type: "json" });
+    return saved || defaultState();
   }
   fs.mkdirSync(path.dirname(FALLBACK_FILE), { recursive: true });
   if (!fs.existsSync(FALLBACK_FILE)) fs.writeFileSync(FALLBACK_FILE, JSON.stringify(defaultState(), null, 2));
@@ -77,8 +78,8 @@ async function loadState() {
 
 async function saveState(state) {
   if (getStore && process.env.NETLIFY) {
-    const store = getStore("alpha-sistema");
-    await store.set("state", JSON.stringify(state));
+    const store = getStore({ name: "alpha-sistema", consistency: "strong" });
+    await store.setJSON("state", state);
     return;
   }
   fs.mkdirSync(path.dirname(FALLBACK_FILE), { recursive: true });
