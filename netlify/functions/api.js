@@ -68,8 +68,8 @@ function verify(token) {
 async function loadState() {
   if (isServerlessRuntime()) {
     const { getStore } = require("@netlify/blobs");
-    const store = getStore({ name: "alpha-sistema", consistency: "strong" });
-    const saved = await store.get("state", { type: "json" });
+    const store = getStore("alpha-sistema");
+    const saved = await store.get("state", { type: "json", consistency: "strong" });
     return saved || defaultState();
   }
   fs.mkdirSync(path.dirname(FALLBACK_FILE), { recursive: true });
@@ -80,7 +80,7 @@ async function loadState() {
 async function saveState(state) {
   if (isServerlessRuntime()) {
     const { getStore } = require("@netlify/blobs");
-    const store = getStore({ name: "alpha-sistema", consistency: "strong" });
+    const store = getStore("alpha-sistema");
     await store.setJSON("state", state);
     return;
   }

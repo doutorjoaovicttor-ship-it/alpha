@@ -16,7 +16,12 @@ const api = async (url, options = {}) => {
     ...options
   });
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(`A API retornou resposta inválida (${response.status}). Aguarde o deploy terminar e recarregue a página.`);
+  }
   if (!response.ok) throw new Error(data.error || `Erro na requisição (${response.status})`);
   return data;
 };
@@ -47,7 +52,7 @@ function hideForm(id) {
 }
 
 async function loadAll() {
-  const [settings, dashboard, clients, services, appointments, payments] = await Promise.all([
+  const results = await Promise.allSettled([
     api("/api/settings"),
     api("/api/dashboard"),
     api("/api/clients"),
@@ -55,9 +60,17 @@ async function loadAll() {
     api("/api/appointments"),
     api("/api/payments")
   ]);
+  const errors = results.filter((result) => result.status === "rejected");
+  if (errors.length) {
+    alert(`Alguns dados não carregaram: ${errors[0].reason.message}`);
+  }
+  const [settings, dashboard, clients, services, appointments, payments] = results.map((result, index) => {
+    if (result.status === "fulfilled") return result.value;
+    return index === 0 ? state.settings : index === 1 ? null : [];
+  });
   Object.assign(state, { settings, clients, services, appointments, payments });
   renderSettings();
-  renderDashboard(dashboard);
+  if (dashboard) renderDashboard(dashboard);
   renderClientOptions();
   renderClients(clients);
   renderServices();
