@@ -13,6 +13,7 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@alpha.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Alpha@2026";
 const SESSION_SECRET = process.env.SESSION_SECRET || "alpha-local-secret-change-in-netlify";
 const FALLBACK_FILE = path.join(process.cwd(), "data", "netlify-state.json");
+const isServerlessRuntime = () => Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
 
 const defaultState = () => ({
   settings: {
@@ -66,7 +67,7 @@ function verify(token) {
 }
 
 async function loadState() {
-  if (getStore && process.env.NETLIFY) {
+  if (getStore && isServerlessRuntime()) {
     const store = getStore({ name: "alpha-sistema", consistency: "strong" });
     const saved = await store.get("state", { type: "json" });
     return saved || defaultState();
@@ -77,7 +78,7 @@ async function loadState() {
 }
 
 async function saveState(state) {
-  if (getStore && process.env.NETLIFY) {
+  if (getStore && isServerlessRuntime()) {
     const store = getStore({ name: "alpha-sistema", consistency: "strong" });
     await store.setJSON("state", state);
     return;
@@ -203,12 +204,12 @@ exports.handler = async (event) => {
         return json(401, { error: "Email ou senha inválidos" });
       }
       const token = sign({ email: body.email, exp: Date.now() + 1000 * 60 * 60 * 12 });
-      const secure = process.env.NETLIFY ? " Secure;" : "";
+      const secure = isServerlessRuntime() ? " Secure;" : "";
       return json(200, { ok: true }, { "Set-Cookie": `alpha_token=${encodeURIComponent(token)}; HttpOnly;${secure} SameSite=Lax; Path=/; Max-Age=43200` });
     }
 
     if (pathName === "/api/logout" && method === "POST") {
-      const secure = process.env.NETLIFY ? " Secure;" : "";
+      const secure = isServerlessRuntime() ? " Secure;" : "";
       return json(200, { ok: true }, { "Set-Cookie": `alpha_token=; HttpOnly;${secure} SameSite=Lax; Path=/; Max-Age=0` });
     }
 
