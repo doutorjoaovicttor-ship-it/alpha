@@ -1,13 +1,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-
-let getStore;
-try {
-  ({ getStore } = require("@netlify/blobs"));
-} catch {
-  getStore = null;
-}
+const { getStore } = require("@netlify/blobs");
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@alpha.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Alpha@2026";
@@ -74,7 +68,6 @@ function verify(token) {
 
 async function loadState() {
   if (isServerlessRuntime()) {
-    if (!getStore) throw new Error("Netlify Blobs não carregou. Confirme se o deploy instalou as dependências do package.json.");
     const store = getStore({ name: "alpha-sistema", consistency: "strong" });
     const saved = await store.get("state", { type: "json" });
     return saved || defaultState();
@@ -86,7 +79,6 @@ async function loadState() {
 
 async function saveState(state) {
   if (isServerlessRuntime()) {
-    if (!getStore) throw new Error("Netlify Blobs não carregou. Confirme se o deploy instalou as dependências do package.json.");
     const store = getStore({ name: "alpha-sistema", consistency: "strong" });
     await store.setJSON("state", state);
     return;
