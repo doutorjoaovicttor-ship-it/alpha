@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alpha Serviços | Painel Administrativo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section class="login-screen" id="loginScreen">
+    <form class="login-card" id="loginForm">
+      <div class="login-logo">A</div>
+      <p class="eyebrow">Alpha Serviços de Limpeza</p>
+      <h1>Acesso administrativo</h1>
+      <label>Email<input name="email" type="email" value="admin@alpha.com" required></label>
+      <label>Senha<input name="password" type="password" value="Alpha@2026" required></label>
+      <button type="submit">Entrar no painel</button>
+      <span class="form-message" id="loginMessage"></span>
+    </form>
+  </section>
+
+  <section class="app hidden" id="app">
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard"><span id="brandLogo">A</span><strong id="brandName">Alpha Serviços</strong></a>
+      <nav>
+        <button class="nav-item active" data-page="dashboard">Dashboard</button>
+        <button class="nav-item" data-page="clientes">Clientes</button>
+        <button class="nav-item" data-page="servicos">Serviços</button>
+        <button class="nav-item" data-page="agendamentos">Agendamentos</button>
+        <button class="nav-item" data-page="financeiro">Financeiro</button>
+        <button class="nav-item" data-page="configuracoes">Configurações</button>
+      </nav>
+      <button class="logout" id="logoutBtn">Sair</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Painel interno empresarial</p>
+          <h2 id="pageTitle">Dashboard</h2>
+        </div>
+        <div class="top-actions">
+          <span id="companyWhatsapp">(61) 92002-8417</span>
+          <button id="refreshBtn">Atualizar</button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-dashboard">
+        <div class="quick-actions">
+          <button data-page-jump="clientes" data-open="clientForm">Novo cliente</button>
+          <button data-page-jump="servicos" data-open="serviceForm">Novo serviço</button>
+          <button data-page-jump="agendamentos" data-open="appointmentForm">Agendar limpeza</button>
+          <button data-page-jump="financeiro" data-open="paymentForm">Lançar pagamento</button>
+        </div>
+
+        <div class="metrics metrics-live">
+          <article><span>Total de clientes</span><strong id="mClients">0</strong><em>base ativa</em></article>
+          <article><span>Recebido no mês</span><strong id="mReceived">R$ 0,00</strong><em>faturamento pago</em></article>
+          <article><span>Serviços agendados</span><strong id="mScheduled">0</strong><em>em aberto</em></article>
+          <article><span>Conclusão</span><strong id="mCompletion">0%</strong><em id="mDone">0 concluídos</em></article>
+        </div>
+
+        <div class="dashboard-command">
+          <article class="panel panel-wide">
+            <div class="panel-head"><h3>Faturamento real</h3><span id="mPending">Pendente: R$ 0,00</span></div>
+            <div class="finance-bars">
+              <div><span>Recebido</span><i id="barReceived"></i></div>
+              <div><span>Pendente</span><i id="barPending"></i></div>
+            </div>
+            <div class="line-chart" id="revenueChart"></div>
+          </article>
+
+          <article class="panel progress-panel">
+            <div class="panel-head"><h3>Meta do mês</h3><span>controle operacional</span></div>
+            <div class="progress-ring" id="completionRing"><strong>0%</strong><span>serviços concluídos</span></div>
+            <div class="notifications" id="notifications"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head"><h3>Serviços por status</h3><span>volume atual</span></div>
+            <div class="status-chart" id="statusChart"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head"><h3>Gráfico semanal</h3><span>serviços por dia</span></div>
+            <div class="weekly-chart" id="weeklyChart"></div>
+          </article>
+
+          <article class="panel list-panel">
+            <div class="panel-head"><h3>Próximos serviços de hoje</h3><span>agenda rápida</span></div>
+            <div class="dash-list" id="todayAppointments"></div>
+          </article>
+
+          <article class="panel list-panel">
+            <div class="panel-head"><h3>Serviços atrasados</h3><span>prioridade</span></div>
+            <div class="dash-list" id="overdueServices"></div>
+          </article>
+
+          <article class="panel list-panel">
+            <div class="panel-head"><h3>Últimos pagamentos</h3><span>financeiro</span></div>
+            <div class="dash-list" id="latestPayments"></div>
+          </article>
+
+          <article class="panel list-panel">
+            <div class="panel-head"><h3>Atividades recentes</h3><span>histórico</span></div>
+            <div class="dash-list" id="recentActivities"></div>
+          </article>
+
+          <article class="panel list-panel">
+            <div class="panel-head"><h3>Funcionários ativos</h3><span>operação</span></div>
+            <div class="dash-list" id="activeEmployees"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="page-clientes">
+        <div class="toolbar"><input id="clientSearch" placeholder="Buscar cliente por nome, telefone ou email"><button data-open="clientForm">Cadastrar cliente</button></div>
+        <form class="form-grid hidden" id="clientForm">
+          <input type="hidden" name="id">
+          <label>Nome<input name="name" required></label>
+          <label>Telefone<input name="phone"></label>
+          <label>Email<input name="email" type="email"></label>
+          <label>Endereço<input name="address"></label>
+          <label class="wide">Observações<textarea name="notes"></textarea></label>
+          <div class="form-actions"><button type="submit">Salvar cliente</button><button type="button" data-close="clientForm">Cancelar</button></div>
+        </form>
+        <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Endereço</th><th>Ações</th></tr></thead><tbody id="clientsTable"></tbody></table></div>
+      </section>
+
+      <section class="page" id="page-servicos">
+        <div class="toolbar"><span>Controle de serviços</span><button data-open="serviceForm">Cadastrar serviço</button></div>
+        <form class="form-grid hidden" id="serviceForm">
+          <input type="hidden" name="id">
+          <label>Cliente<select name="client_id" required></select></label>
+          <label>Tipo de serviço<input name="type" required></label>
+          <label>Valor cobrado<input name="amount" type="number" step="0.01" required></label>
+          <label>Status<select name="status"><option>pendente</option><option>agendado</option><option>concluído</option><option>cancelado</option></select></label>
+          <label>Forma de pagamento<input name="payment_method"></label>
+          <label>Data do serviço<input name="service_date" type="date"></label>
+          <label class="wide">Observações<textarea name="notes"></textarea></label>
+          <div class="form-actions"><button type="submit">Salvar serviço</button><button type="button" data-close="serviceForm">Cancelar</button></div>
+        </form>
+        <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Tipo</th><th>Valor</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead><tbody id="servicesTable"></tbody></table></div>
+      </section>
+
+      <section class="page" id="page-agendamentos">
+        <div class="toolbar"><span>Calendário em lista organizada</span><button data-open="appointmentForm">Criar agendamento</button></div>
+        <form class="form-grid hidden" id="appointmentForm">
+          <input type="hidden" name="id">
+          <label>Cliente<select name="client_id" required></select></label>
+          <label>Data<input name="date" type="date" required></label>
+          <label>Horário<input name="time" type="time" required></label>
+          <label>Tipo de limpeza<input name="cleaning_type" required></label>
+          <label>Endereço<input name="address"></label>
+          <label>Funcionário responsável<input name="employee"></label>
+          <label>Status<select name="status"><option>pendente</option><option>agendado</option><option>concluído</option><option>cancelado</option></select></label>
+          <div class="form-actions"><button type="submit">Salvar agendamento</button><button type="button" data-close="appointmentForm">Cancelar</button></div>
+        </form>
+        <div class="cards-list" id="appointmentsList"></div>
+      </section>
+
+      <section class="page" id="page-financeiro">
+        <div class="metrics compact">
+          <article><span>Total recebido</span><strong id="fReceived">R$ 0,00</strong></article>
+          <article><span>Total pendente</span><strong id="fPending">R$ 0,00</strong></article>
+        </div>
+        <div class="toolbar"><span>Lista de pagamentos</span><button data-open="paymentForm">Registrar pagamento</button></div>
+        <form class="form-grid hidden" id="paymentForm">
+          <input type="hidden" name="id">
+          <label>Cliente<select name="client_id" required></select></label>
+          <label>Serviço feito<select name="service_id"></select></label>
+          <label>Valor<input name="amount" type="number" step="0.01" required></label>
+          <label>Forma de pagamento<input name="payment_method"></label>
+          <label>Data de pagamento<input name="payment_date" type="date"></label>
+          <label>Status<select name="status"><option>pago</option><option>pendente</option><option>atrasado</option></select></label>
+          <div class="form-actions"><button type="submit">Salvar pagamento</button><button type="button" data-close="paymentForm">Cancelar</button></div>
+        </form>
+        <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Forma</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
+      </section>
+
+      <section class="page" id="page-configuracoes">
+        <form class="form-grid settings-form" id="settingsForm">
+          <label>Nome da empresa<input name="company_name" required></label>
+          <label>Email<input name="email" type="email"></label>
+          <label>WhatsApp<input name="whatsapp"></label>
+          <label>Logo<input name="logo" placeholder="Letra, texto ou URL"></label>
+          <label class="wide">Endereço<input name="address"></label>
+          <div class="form-actions"><button type="submit">Salvar configurações</button></div>
+        </form>
+      </section>
+    </main>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
