@@ -13,7 +13,13 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@alpha.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Alpha@2026";
 const SESSION_SECRET = process.env.SESSION_SECRET || "alpha-local-secret-change-in-netlify";
 const FALLBACK_FILE = path.join(process.cwd(), "data", "netlify-state.json");
-const isServerlessRuntime = () => Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT);
+const isServerlessRuntime = () => Boolean(
+  process.env.NETLIFY ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.AWS_EXECUTION_ENV ||
+  process.env.LAMBDA_TASK_ROOT ||
+  String(process.cwd()).startsWith("/var/task")
+);
 
 const defaultState = () => ({
   settings: {
@@ -67,7 +73,8 @@ function verify(token) {
 }
 
 async function loadState() {
-  if (getStore && isServerlessRuntime()) {
+  if (isServerlessRuntime()) {
+    if (!getStore) throw new Error("Netlify Blobs não carregou. Confirme se o deploy instalou as dependências do package.json.");
     const store = getStore({ name: "alpha-sistema", consistency: "strong" });
     const saved = await store.get("state", { type: "json" });
     return saved || defaultState();
@@ -78,7 +85,8 @@ async function loadState() {
 }
 
 async function saveState(state) {
-  if (getStore && isServerlessRuntime()) {
+  if (isServerlessRuntime()) {
+    if (!getStore) throw new Error("Netlify Blobs não carregou. Confirme se o deploy instalou as dependências do package.json.");
     const store = getStore({ name: "alpha-sistema", consistency: "strong" });
     await store.setJSON("state", state);
     return;
